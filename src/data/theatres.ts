@@ -35,8 +35,8 @@ export interface Showtime {
 export const theatres: Theatre[] = [
   {
     id: "t1",
-    name: "CineMax Grand",
-    location: "Downtown Plaza, 5th Avenue",
+    name: "LA Maris Cinemas",
+    location: "DMaris Theater Complex, Teppakulam, Trichy, Tamil Nadu",
     description: "The flagship CineMax experience featuring Dolby Atmos sound, laser projection, and luxurious recliner seating across 4 screens.",
     imageUrl: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&h=400&fit=crop",
     galleryImages: [
@@ -59,8 +59,8 @@ export const theatres: Theatre[] = [
   },
   {
     id: "t2",
-    name: "Starlight Cinemas",
-    location: "Riverside Mall, Block C",
+    name: "Mega Star Cinemas",
+    location: "Thillai Nagar, near Chathram Bus stand, Trichy, Tamil Nadu",
     description: "A modern multiplex with IMAX screens and immersive 4DX experiences. Known for its spectacular lobby and gourmet concessions.",
     imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=800&h=400&fit=crop",
     galleryImages: [
@@ -81,8 +81,8 @@ export const theatres: Theatre[] = [
   },
   {
     id: "t3",
-    name: "Velvet Screen Lounge",
-    location: "Heritage Quarter, Oak Street",
+    name: "LA SonaMina Cinemas",
+    location: "8G Williams Rd, Melapudur,Cantonment,Near Central Bus Stand, Trichy, Tamil Nadu",
     description: "An intimate boutique cinema with just 2 screens, offering a curated selection of films in a luxurious, lounge-style setting with full bar service.",
     imageUrl: "https://images.unsplash.com/photo-1595769816263-9b910be24d5f?w=800&h=400&fit=crop",
     galleryImages: [
@@ -104,8 +104,8 @@ export const theatres: Theatre[] = [
   },
   {
     id: "t4",
-    name: "Nova Megaplex",
-    location: "Tech Park, Innovation Drive",
+    name: "Ramba Theatre",
+    location: "",
     description: "A cutting-edge cinema featuring the latest in LED screen technology and spatial audio. The go-to spot for blockbuster premieres.",
     imageUrl: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4?w=800&h=400&fit=crop",
     galleryImages: [
@@ -128,15 +128,15 @@ export const theatres: Theatre[] = [
 ];
 
 export const showtimes: Showtime[] = [
-  { theatreId: "t1", movieId: "1", times: ["10:30 AM", "1:45 PM", "5:00 PM", "8:30 PM"], price: { standard: 12, premium: 18, vip: 28 } },
-  { theatreId: "t1", movieId: "2", times: ["11:00 AM", "2:15 PM", "6:00 PM", "9:15 PM"], price: { standard: 12, premium: 18, vip: 28 } },
-  { theatreId: "t1", movieId: "3", times: ["12:00 PM", "3:30 PM", "7:00 PM"], price: { standard: 12, premium: 18, vip: 28 } },
-  { theatreId: "t2", movieId: "1", times: ["10:00 AM", "1:00 PM", "4:30 PM", "8:00 PM", "10:45 PM"], price: { standard: 14, premium: 20, vip: 32 } },
-  { theatreId: "t2", movieId: "4", times: ["11:30 AM", "3:00 PM", "6:30 PM", "9:45 PM"], price: { standard: 14, premium: 20, vip: 32 } },
-  { theatreId: "t2", movieId: "5", times: ["10:15 AM", "1:30 PM", "5:00 PM"], price: { standard: 14, premium: 20, vip: 32 } },
-  { theatreId: "t3", movieId: "3", times: ["2:00 PM", "5:30 PM", "8:45 PM"], price: { standard: 16, premium: 24, vip: 36 } },
-  { theatreId: "t3", movieId: "5", times: ["3:00 PM", "6:30 PM", "9:30 PM"], price: { standard: 16, premium: 24, vip: 36 } },
-  { theatreId: "t4", movieId: "1", times: ["10:00 AM", "12:45 PM", "3:30 PM", "6:15 PM", "9:00 PM", "11:30 PM"], price: { standard: 10, premium: 15, vip: 22 } },
-  { theatreId: "t4", movieId: "2", times: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM", "10:30 PM"], price: { standard: 10, premium: 15, vip: 22 } },
-  { theatreId: "t4", movieId: "4", times: ["10:30 AM", "1:30 PM", "4:30 PM", "7:30 PM"], price: { standard: 10, premium: 15, vip: 22 } },
+  { theatreId: "t1", movieId: "1", times: ["10:30 AM", "1:45 PM", "5:00 PM", "8:30 PM"], price: { standard: 150, premium: 250, vip: 400 } },
+  { theatreId: "t1", movieId: "2", times: ["11:00 AM", "2:15 PM", "6:00 PM", "9:15 PM"], price: { standard: 150, premium: 250, vip: 400 } },
+  { theatreId: "t1", movieId: "3", times: ["12:00 PM", "3:30 PM", "7:00 PM"], price: { standard: 150, premium: 250, vip: 400 } },
+  { theatreId: "t2", movieId: "1", times: ["10:00 AM", "1:00 PM", "4:30 PM", "8:00 PM", "10:45 PM"], price: { standard: 180, premium: 300, vip: 500 } },
+  { theatreId: "t2", movieId: "4", times: ["11:30 AM", "3:00 PM", "6:30 PM", "9:45 PM"], price: { standard: 180, premium: 300, vip: 500 } },
+  { theatreId: "t2", movieId: "5", times: ["10:15 AM", "1:30 PM", "5:00 PM"], price: { standard: 180, premium: 300, vip: 500 } },
+  { theatreId: "t3", movieId: "3", times: ["2:00 PM", "5:30 PM", "8:45 PM"], price: { standard: 200, premium: 350, vip: 550 } },
+  { theatreId: "t3", movieId: "5", times: ["3:00 PM", "6:30 PM", "9:30 PM"], price: { standard: 200, premium: 350, vip: 550 } },
+  { theatreId: "t4", movieId: "1", times: ["10:00 AM", "12:45 PM", "3:30 PM", "6:15 PM", "9:00 PM", "11:30 PM"], price: { standard: 120, premium: 200, vip: 350 } },
+  { theatreId: "t4", movieId: "2", times: ["11:00 AM", "2:00 PM", "5:00 PM", "8:00 PM", "10:30 PM"], price: { standard: 120, premium: 200, vip: 350 } },
+  { theatreId: "t4", movieId: "4", times: ["10:30 AM", "1:30 PM", "4:30 PM", "7:30 PM"], price: { standard: 120, premium: 200, vip: 350 } },
 ];

@@ -1,7 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
-import { Film, Search, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Film, Search, Menu, X, LogIn, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -10,6 +12,8 @@ const navLinks = [
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -38,12 +42,44 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             ))}
           </nav>
 
-          <button
-            className="text-muted-foreground md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-3">
+            {isAuthenticated ? (
+              <div className="hidden items-center gap-3 md:flex">
+                <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  {user?.name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-muted-foreground hover:text-primary"
+                  onClick={() => { logout(); navigate("/login"); }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="hidden gap-1.5 border-primary/30 text-primary hover:bg-primary/10 md:inline-flex"
+              >
+                <Link to="/login">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                </Link>
+              </Button>
+            )}
+
+            <button
+              className="text-muted-foreground md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {mobileMenuOpen && (
@@ -61,6 +97,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 {link.label}
               </Link>
             ))}
+            {isAuthenticated ? (
+              <button
+                onClick={() => { logout(); navigate("/login"); setMobileMenuOpen(false); }}
+                className="block py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                Logout ({user?.name})
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-2 text-sm font-medium text-primary transition-colors hover:text-primary"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         )}
       </header>

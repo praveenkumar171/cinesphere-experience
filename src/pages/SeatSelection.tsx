@@ -147,9 +147,9 @@ const SeatSelection = () => {
 
         {/* Legend */}
         <div className="mx-auto mt-4 flex max-w-md flex-wrap justify-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-secondary border border-border" /> Standard (${showtime.price.standard})</div>
-          <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-blue-900/40 border border-blue-800/50" /> Premium (${showtime.price.premium})</div>
-          <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-primary/20 border border-primary/40" /> VIP (${showtime.price.vip})</div>
+          <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-secondary border border-border" /> Standard (₹{showtime.price.standard})</div>
+          <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-blue-900/40 border border-blue-800/50" /> Premium (₹{showtime.price.premium})</div>
+          <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-primary/20 border border-primary/40" /> VIP (₹{showtime.price.vip})</div>
           <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-muted/30 opacity-30" /> Occupied</div>
           <div className="flex items-center gap-1.5"><div className="h-4 w-4 rounded-t-md bg-primary" /> Selected</div>
         </div>
@@ -164,7 +164,7 @@ const SeatSelection = () => {
           </div>
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-muted-foreground">Total Price</span>
-            <span className="font-display text-2xl font-bold text-primary">${totalPrice}</span>
+            <span className="font-display text-2xl font-bold text-primary">₹{totalPrice}</span>
           </div>
           <Button className="w-full" size="lg" disabled={selectedSeats.length === 0} onClick={handleProceed}>
             Proceed to Booking

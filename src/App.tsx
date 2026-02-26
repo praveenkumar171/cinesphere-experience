@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import MovieDetail from "./pages/MovieDetail";
@@ -11,30 +13,44 @@ import TheatreDetail from "./pages/TheatreDetail";
 import SeatSelection from "./pages/SeatSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Feedback from "./pages/Feedback";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+/** Wraps a page with auth guard + Layout (header/footer) */
+const Protected = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <Layout>{children}</Layout>
+  </ProtectedRoute>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/movie/:id" element={<MovieDetail />} />
-            <Route path="/theatres" element={<TheatreExplorer />} />
-            <Route path="/theatre/:id" element={<TheatreDetail />} />
-            <Route path="/book/:movieId/:theatreId/:time" element={<SeatSelection />} />
-            <Route path="/confirm/:movieId/:theatreId/:time" element={<BookingConfirmation />} />
-            <Route path="/feedback/:theatreId" element={<Feedback />} />
-            <Route path="*" element={<NotFound />} />
+            {/* Public — full-screen login & signup (no header/footer) */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+
+            {/* Protected — all other pages require login */}
+            <Route path="/" element={<Protected><Index /></Protected>} />
+            <Route path="/movie/:id" element={<Protected><MovieDetail /></Protected>} />
+            <Route path="/theatres" element={<Protected><TheatreExplorer /></Protected>} />
+            <Route path="/theatre/:id" element={<Protected><TheatreDetail /></Protected>} />
+            <Route path="/book/:movieId/:theatreId/:time" element={<Protected><SeatSelection /></Protected>} />
+            <Route path="/confirm/:movieId/:theatreId/:time" element={<Protected><BookingConfirmation /></Protected>} />
+            <Route path="/feedback/:theatreId" element={<Protected><Feedback /></Protected>} />
+            <Route path="*" element={<Protected><NotFound /></Protected>} />
           </Routes>
-        </Layout>
-      </BrowserRouter>
-    </TooltipProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

@@ -105,7 +105,7 @@ const MovieDetail = () => {
                       </div>
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Standard: ${st.price.standard} · Premium: ${st.price.premium} · VIP: ${st.price.vip}
+                      Standard: ₹{st.price.standard} · Premium: ₹{st.price.premium} · VIP: ₹{st.price.vip}
                     </p>
                   </div>
                 );

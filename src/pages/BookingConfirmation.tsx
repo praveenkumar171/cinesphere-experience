@@ -51,7 +51,7 @@ const BookingConfirmation = () => {
               <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span>Today</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Time</span><span>{decodedTime}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Seats</span><span>{seats}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-primary">${total}</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-primary">₹{total}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Booking ID</span><span className="font-mono text-xs">{bookingId}</span></div>
             </div>
             <div className="border-t border-dashed border-border p-5 flex flex-col items-center">
@@ -99,7 +99,7 @@ const BookingConfirmation = () => {
 
           <div className="border-t border-border pt-4 flex items-center justify-between">
             <span className="text-muted-foreground">Total Amount</span>
-            <span className="font-display text-3xl font-bold text-primary">${total}</span>
+            <span className="font-display text-3xl font-bold text-primary">₹{total}</span>
           </div>
 
           <Button className="w-full" size="lg" onClick={() => setConfirmed(true)}>
