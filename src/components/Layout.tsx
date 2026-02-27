@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Film, Search, Menu, X, LogIn, LogOut, User } from "lucide-react";
-import { useState } from "react";
+import { Film, Search, Menu, X, LogIn, LogOut, User, MapPin, ChevronDown } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { useCity } from "@/context/CityContext";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -14,18 +15,62 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const { selectedCity, setSelectedCity, cities } = useCity();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cityDropdownOpen, setCityDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setCityDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-2">
-            <Film className="h-7 w-7 text-primary" />
-            <span className="font-display text-xl font-bold tracking-tight">
-              Cine<span className="text-primary">Sphere</span>
-            </span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2">
+              <Film className="h-7 w-7 text-primary" />
+              <span className="font-display text-xl font-bold tracking-tight">
+                Cine<span className="text-primary">Sphere</span>
+              </span>
+            </Link>
+
+            {/* City Selector */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setCityDropdownOpen(!cityDropdownOpen)}
+                className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all hover:border-primary/40 hover:text-foreground"
+              >
+                <MapPin className="h-3.5 w-3.5 text-primary" />
+                {selectedCity}
+                <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", cityDropdownOpen && "rotate-180")} />
+              </button>
+              {cityDropdownOpen && (
+                <div className="absolute left-0 top-full mt-1 z-50 min-w-[140px] overflow-hidden rounded-lg border border-border bg-card shadow-xl">
+                  {cities.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => { setSelectedCity(city); setCityDropdownOpen(false); }}
+                      className={cn(
+                        "flex w-full items-center gap-2 px-4 py-2.5 text-sm transition-colors hover:bg-primary/10",
+                        selectedCity === city ? "text-primary font-semibold bg-primary/5" : "text-muted-foreground"
+                      )}
+                    >
+                      <MapPin className="h-3.5 w-3.5" />
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
           <nav className="hidden items-center gap-6 md:flex">
             {navLinks.map((link) => (

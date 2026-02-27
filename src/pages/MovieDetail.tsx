@@ -6,9 +6,11 @@ import { theatres } from "@/data/theatres";
 import { showtimes } from "@/data/theatres";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useCity } from "@/context/CityContext";
 
 const MovieDetail = () => {
   const { id } = useParams();
+  const { selectedCity } = useCity();
   const movie = movies.find((m) => m.id === id);
 
   if (!movie) {
@@ -19,7 +21,8 @@ const MovieDetail = () => {
     );
   }
 
-  const movieShowtimes = showtimes.filter((s) => s.movieId === movie.id);
+  const cityTheatreIds = theatres.filter((t) => t.city === selectedCity).map((t) => t.id);
+  const movieShowtimes = showtimes.filter((s) => s.movieId === movie.id && cityTheatreIds.includes(s.theatreId));
 
   return (
     <div>

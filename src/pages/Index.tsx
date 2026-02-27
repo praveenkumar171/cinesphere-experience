@@ -3,17 +3,27 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Star, MapPin, ChevronRight, Play } from "lucide-react";
 import { movies } from "@/data/movies";
-import { theatres } from "@/data/theatres";
+import { theatres, showtimes } from "@/data/theatres";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import StarRating from "@/components/StarRating";
+import { useCity } from "@/context/CityContext";
 
 const Index = () => {
   const [search, setSearch] = useState("");
-  const nowShowing = movies.filter((m) => m.status === "now-showing");
+  const { selectedCity } = useCity();
+
+  // Get theatre IDs for the selected city
+  const cityTheatreIds = theatres.filter((t) => t.city === selectedCity).map((t) => t.id);
+  // Get movie IDs that have showtimes in the selected city's theatres
+  const cityMovieIds = new Set(
+    showtimes.filter((s) => cityTheatreIds.includes(s.theatreId)).map((s) => s.movieId)
+  );
+
+  const nowShowing = movies.filter((m) => m.status === "now-showing" && cityMovieIds.has(m.id));
   const comingSoon = movies.filter((m) => m.status === "coming-soon");
-  const featured = nowShowing[0];
+  const featured = nowShowing[0] || movies.find((m) => m.status === "now-showing");
 
   const filteredMovies = search
     ? movies.filter((m) => m.title.toLowerCase().includes(search.toLowerCase()))
@@ -156,51 +166,6 @@ const Index = () => {
                 </div>
                 <h3 className="mt-2 font-display text-sm font-semibold">{movie.title}</h3>
                 <p className="text-xs text-muted-foreground">{movie.genre.join(", ")}</p>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Top Theatres */}
-      <section className="container mx-auto px-4 pb-16">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="font-display text-2xl font-bold">Top Theatres</h2>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/theatres" className="flex items-center gap-1">
-              View All <ChevronRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {theatres.map((theatre, i) => (
-            <motion.div
-              key={theatre.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Link
-                to={`/theatre/${theatre.id}`}
-                className="group block overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/30"
-              >
-                <div className="relative h-36 overflow-hidden">
-                  <img
-                    src={theatre.imageUrl}
-                    alt={theatre.name}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-display font-semibold">{theatre.name}</h3>
-                  <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="h-3 w-3" /> {theatre.location}
-                  </p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <StarRating rating={theatre.experienceScore} size="sm" />
-                    <span className="text-sm font-semibold text-primary">{theatre.experienceScore}/10</span>
-                  </div>
-                </div>
               </Link>
             </motion.div>
           ))}
