@@ -110,14 +110,6 @@ const SeatSelection = () => {
           <p className="text-sm text-muted-foreground">{theatre.name} · {decodedTime}</p>
         </div>
 
-        {/* Screen */}
-        <div className="mx-auto mb-8 max-w-2xl">
-          <div className="mb-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <Monitor className="h-4 w-4" /> SCREEN
-          </div>
-          <div className="mx-8 h-2 rounded-t-full bg-gradient-to-r from-primary/20 via-primary/60 to-primary/20" />
-        </div>
-
         {/* Seat Map */}
         <div className="mx-auto max-w-2xl overflow-x-auto">
           <div className="flex flex-col items-center gap-1.5 min-w-fit pb-4">
@@ -142,6 +134,14 @@ const SeatSelection = () => {
                 <span className="w-5 text-center text-xs text-muted-foreground">{rowLabel(ri)}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Screen placed near last row (bottom) */}
+        <div className="mx-auto mt-6 max-w-2xl">
+          <div className="mx-8 h-2 rounded-b-full bg-gradient-to-r from-primary/20 via-primary/60 to-primary/20" />
+          <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Monitor className="h-4 w-4" /> SCREEN
           </div>
         </div>
 

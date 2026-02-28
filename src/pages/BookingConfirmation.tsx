@@ -63,7 +63,7 @@ const BookingConfirmation = () => {
           </div>
 
           <div className="mt-6 flex gap-3 justify-center">
-            <Button asChild variant="outline"><Link to="/">Back Home</Link></Button>
+            <Button asChild variant="outline"><Link to="/home">Back Home</Link></Button>
             <Button asChild><Link to={`/feedback/${theatre.id}`}>Rate Theatre</Link></Button>
           </div>
         </motion.div>

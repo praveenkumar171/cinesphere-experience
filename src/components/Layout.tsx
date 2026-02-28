@@ -7,7 +7,7 @@ import { useCity } from "@/context/CityContext";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { to: "/", label: "Home" },
+  { to: "/home", label: "Home" },
   { to: "/theatres", label: "Theatres" },
 ];
 
@@ -35,7 +35,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/home" className="flex items-center gap-2">
               <Film className="h-7 w-7 text-primary" />
               <span className="font-display text-xl font-bold tracking-tight">
                 Cine<span className="text-primary">Sphere</span>

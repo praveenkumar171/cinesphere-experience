@@ -34,7 +34,7 @@ const MovieDetail = () => {
 
       <div className="container mx-auto px-4 -mt-40 relative">
         <Button asChild variant="ghost" size="sm" className="mb-4">
-          <Link to="/"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Link>
+          <Link to="/home"><ArrowLeft className="h-4 w-4 mr-1" /> Back</Link>
         </Button>
 
         <motion.div

@@ -16,6 +16,7 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import Feedback from "./pages/Feedback";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,12 +37,13 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public — full-screen login & signup (no header/footer) */}
+            {/* Public — marketing / auth */}
+            <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
 
             {/* Protected — all other pages require login */}
-            <Route path="/" element={<Protected><Index /></Protected>} />
+            <Route path="/home" element={<Protected><Index /></Protected>} />
             <Route path="/movie/:id" element={<Protected><MovieDetail /></Protected>} />
             <Route path="/theatres" element={<Protected><TheatreExplorer /></Protected>} />
             <Route path="/theatre/:id" element={<Protected><TheatreDetail /></Protected>} />

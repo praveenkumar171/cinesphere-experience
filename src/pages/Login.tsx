@@ -37,7 +37,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   // Where to redirect after login (preserves the page the user originally tried to visit)
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/";
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || "/home";
 
   /* live validation on blur */
   const handleBlur = useCallback(

@@ -53,7 +53,7 @@ const Signup = () => {
   );
 
   // Already logged in — skip signup
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated) return <Navigate to="/home" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +77,7 @@ const Signup = () => {
         description: "Welcome to CineSphere. Enjoy the experience!",
       });
 
-      navigate("/");
+      navigate("/home");
     } catch {
       toast({
         title: "Signup failed",
