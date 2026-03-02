@@ -11,7 +11,14 @@ const CityContext = createContext<CityContextType | undefined>(undefined);
 export const cities = ["Trichy", "Thanjavur"];
 
 export const CityProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedCity, setSelectedCity] = useState<string>("Trichy");
+  const [selectedCity, setSelectedCityState] = useState<string>(
+    () => localStorage.getItem("selectedCity") || "Trichy"
+  );
+
+  const setSelectedCity = (city: string) => {
+    localStorage.setItem("selectedCity", city);
+    setSelectedCityState(city);
+  };
 
   return (
     <CityContext.Provider value={{ selectedCity, setSelectedCity, cities }}>
