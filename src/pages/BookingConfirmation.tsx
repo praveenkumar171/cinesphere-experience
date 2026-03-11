@@ -5,11 +5,13 @@ import { Check, Film, MapPin, Clock, Armchair, QrCode, ArrowLeft, Download } fro
 import { movies } from "@/data/movies";
 import { theatres } from "@/data/theatres";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 const BookingConfirmation = () => {
   const { movieId, theatreId, time } = useParams();
   const [searchParams] = useSearchParams();
   const [confirmed, setConfirmed] = useState(false);
+  const { user } = useAuth();
 
   const movie = movies.find((m) => m.id === movieId);
   const theatre = theatres.find((t) => t.id === theatreId);
@@ -102,7 +104,16 @@ const BookingConfirmation = () => {
             <span className="font-display text-3xl font-bold text-primary">₹{total}</span>
           </div>
 
-          <Button className="w-full" size="lg" onClick={() => setConfirmed(true)}>
+          <Button className="w-full" size="lg" onClick={() => {
+            // Save booking to localStorage so user can write reviews
+            if (user && movieId) {
+              const key = "cinesphere_bookings";
+              const stored = JSON.parse(localStorage.getItem(key) || "[]");
+              stored.push({ email: user.email, movieId, theatreId, time: decodedTime, seats, total, date: new Date().toISOString() });
+              localStorage.setItem(key, JSON.stringify(stored));
+            }
+            setConfirmed(true);
+          }}>
             Confirm Booking
           </Button>
           <p className="text-center text-xs text-muted-foreground">This is a simulated booking — no real payment will be made</p>
