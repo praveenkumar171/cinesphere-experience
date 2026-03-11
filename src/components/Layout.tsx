@@ -94,6 +94,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   <User className="h-4 w-4" />
                   {user?.name}
                 </span>
+                {user?.role === "admin" && (
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary hover:text-primary/80"
+                  >
+                    <Link to="/admin">Admin Panel</Link>
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"

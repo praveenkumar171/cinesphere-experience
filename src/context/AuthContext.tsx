@@ -4,11 +4,13 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 export interface User {
   email: string;
   name: string;
+  role: "user" | "admin";
 }
 
 interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -40,7 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => setUser(null);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isAdmin: user?.role === "admin", login, logout }}>
       {children}
     </AuthContext.Provider>
   );

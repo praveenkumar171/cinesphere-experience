@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { CityProvider } from "@/context/CityContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import MovieDetail from "./pages/MovieDetail";
@@ -14,6 +15,7 @@ import TheatreDetail from "./pages/TheatreDetail";
 import SeatSelection from "./pages/SeatSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Feedback from "./pages/Feedback";
+import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Landing from "./pages/Landing";
@@ -50,6 +52,10 @@ const App = () => (
             <Route path="/book/:movieId/:theatreId/:time" element={<Protected><SeatSelection /></Protected>} />
             <Route path="/confirm/:movieId/:theatreId/:time" element={<Protected><BookingConfirmation /></Protected>} />
             <Route path="/feedback/:theatreId" element={<Protected><Feedback /></Protected>} />
+
+            {/* Admin — requires admin role */}
+            <Route path="/admin" element={<AdminRoute><Layout><AdminDashboard /></Layout></AdminRoute>} />
+
             <Route path="*" element={<Protected><NotFound /></Protected>} />
           </Routes>
         </BrowserRouter>

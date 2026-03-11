@@ -19,10 +19,10 @@ exports.signup = async (req, res) => {
   }
 
   const hashed = await bcrypt.hash(password, 10);
-  const user = { id: uuidv4(), name, email, password: hashed };
+  const user = { id: uuidv4(), name, email, password: hashed, role: "user" };
   users.push(user);
 
-  const payload = { id: user.id, email: user.email, name: user.name };
+  const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);
   refreshTokens.add(refreshToken);
@@ -44,7 +44,7 @@ exports.login = async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
-  const payload = { id: user.id, email: user.email, name: user.name };
+  const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);
   refreshTokens.add(refreshToken);
@@ -63,7 +63,7 @@ exports.refreshToken = (req, res) => {
     const decoded = verifyRefreshToken(token);
     refreshTokens.delete(token);
 
-    const payload = { id: decoded.id, email: decoded.email, name: decoded.name };
+    const payload = { id: decoded.id, email: decoded.email, name: decoded.name, role: decoded.role };
     const accessToken = generateAccessToken(payload);
     const newRefreshToken = generateRefreshToken(payload);
     refreshTokens.add(newRefreshToken);
