@@ -1,9 +1,9 @@
 const CACHE_NAME = 'cinesphere-v1';
 const RUNTIME_CACHE = 'cinesphere-runtime';
 
+// Only cache STATIC assets, NOT index.html
+// This ensures HTML/JS are always fetched fresh with new API URLs
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/favicon.jpg',
   '/manifest.json',
 ];
@@ -72,6 +72,40 @@ self.addEventListener('fetch', (event) => {
               JSON.stringify({ message: 'Offline - API not available' }),
               { status: 503, headers: { 'Content-Type': 'application/json' } }
             );
+          });
+        })
+    );
+    return;
+  }
+
+  // HTML files - ALWAYS fetch fresh from network to get latest code
+  if (url.pathname === '/' || url.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          console.log('🌐 Fresh HTML from network:', url.pathname);
+          return response;
+        })
+        .catch(() => {
+          console.warn('❌ Offline - HTML not available:', url.pathname);
+          return new Response('Offline - App not available', { status: 503 });
+        })
+    );
+    return;
+  }
+
+  // JavaScript bundles - ALWAYS fetch fresh to get latest API URL detection
+  if (url.pathname.includes('/assets/') && url.pathname.endsWith('.js')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          console.log('🌐 Fresh JS from network:', url.pathname);
+          return response;
+        })
+        .catch(() => {
+          console.warn('❌ Offline - JS not available:', url.pathname);
+          return caches.match(request).then((cached) => {
+            return cached || new Response('Offline - JS not available', { status: 503 });
           });
         })
     );
