@@ -1,3 +1,4 @@
+// CACHE BUSTER - Force Vercel rebuild: 2026-04-16T10:00:00Z
 const getDefaultApiBaseUrl = () => {
   if (typeof window === "undefined") {
     return "https://cinesphere-0rxv.onrender.com";
