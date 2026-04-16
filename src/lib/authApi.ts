@@ -18,7 +18,10 @@ const parseError = async (response: Response) => {
 
 export const signupRequest = async (name: string, email: string, password: string): Promise<AuthResponse> => {
   try {
-    const response = await fetch(apiUrl("/api/auth/signup"), {
+    const url = apiUrl("/api/auth/signup");
+    console.log("📤 Signup request to:", url);
+    
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
@@ -26,12 +29,15 @@ export const signupRequest = async (name: string, email: string, password: strin
       cache: "no-store",
     });
 
+    console.log("📥 Signup response:", response.status, response.statusText);
+    
     if (!response.ok) {
       throw new Error(await parseError(response));
     }
 
     return (await response.json()) as AuthResponse;
   } catch (error) {
+    console.error("❌ Signup error:", error);
     if (error instanceof TypeError) {
       throw new Error("Network error: Could not connect to server. Please check your internet connection.");
     }
@@ -41,7 +47,10 @@ export const signupRequest = async (name: string, email: string, password: strin
 
 export const loginRequest = async (email: string, password: string): Promise<AuthResponse> => {
   try {
-    const response = await fetch(apiUrl("/api/auth/login"), {
+    const url = apiUrl("/api/auth/login");
+    console.log("📤 Login request to:", url);
+    
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -49,12 +58,15 @@ export const loginRequest = async (email: string, password: string): Promise<Aut
       cache: "no-store",
     });
 
+    console.log("📥 Login response:", response.status, response.statusText);
+    
     if (!response.ok) {
       throw new Error(await parseError(response));
     }
 
     return (await response.json()) as AuthResponse;
   } catch (error) {
+    console.error("❌ Login error:", error);
     if (error instanceof TypeError) {
       throw new Error("Network error: Could not connect to server. Please check your internet connection.");
     }
