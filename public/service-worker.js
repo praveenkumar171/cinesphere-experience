@@ -43,8 +43,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
+  // Skip non-GET requests (POST, PUT, DELETE, etc. go directly to network)
   if (request.method !== 'GET') {
+    console.log('🔄 Non-GET request, bypassing SW:', request.method, url.pathname);
     return;
   }
 
@@ -60,7 +61,8 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('🚨 API fetch error:', url.pathname, error);
           return caches.match(request).then((cached) => {
             if (cached) {
               console.log('📦 Using cached API response for:', url.pathname);
