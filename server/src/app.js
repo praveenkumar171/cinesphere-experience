@@ -19,13 +19,20 @@ const allowedOrigins = (CLIENT_URL || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-if (!allowedOrigins.includes("http://localhost:8080")) {
-  allowedOrigins.push("http://localhost:8080");
-}
+// Always allow development and production URLs
+const defaultOrigins = [
+  "http://localhost:8080",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://cinesphere-experience.vercel.app",
+  "https://cinesphere-0rxv.onrender.com",
+];
 
-if (!allowedOrigins.includes("http://localhost:5173")) {
-  allowedOrigins.push("http://localhost:5173");
-}
+defaultOrigins.forEach((origin) => {
+  if (!allowedOrigins.includes(origin)) {
+    allowedOrigins.push(origin);
+  }
+});
 
 const isPrivateNetworkHost = (host) => {
   return (
