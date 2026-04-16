@@ -5,12 +5,21 @@ const Theatre = require("../models/Theatre");
 
 const connectToDatabase = async () => {
   if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not configured");
+    const error = "❌ MONGODB_URI is not configured. Please set it in environment variables.";
+    console.error(error);
+    throw new Error(error);
   }
 
-  await mongoose.connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 10000,
-  });
+  try {
+    console.log("🔌 Connecting to MongoDB...");
+    await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+    });
+    console.log("✅ MongoDB connected successfully");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    throw error;
+  }
 };
 
 const seedTheatresIfEmpty = async () => {
