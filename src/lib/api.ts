@@ -1,8 +1,14 @@
 const getDefaultApiBaseUrl = () => {
   if (typeof window === "undefined") {
-    return "http://localhost:5000";
+    return "https://cinesphere-0rxv.onrender.com";
   }
 
+  // In production on Vercel, use Render backend
+  if (window.location.hostname.includes("vercel.app")) {
+    return "https://cinesphere-0rxv.onrender.com";
+  }
+
+  // Fallback for local development
   return `${window.location.protocol}//${window.location.hostname}:5000`;
 };
 
