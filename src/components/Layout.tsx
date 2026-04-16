@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Film, Search, Menu, X, LogIn, LogOut, User, MapPin, ChevronDown } from "lucide-react";
+import { Film, Search, Menu, X, LogIn, LogOut, User, MapPin, ChevronDown, Ticket } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -90,10 +90,17 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <div className="hidden items-center gap-3 md:flex">
-                <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <User className="h-4 w-4" />
-                  {user?.name}
-                </span>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 text-muted-foreground hover:text-primary"
+                >
+                  <Link to="/my-bookings">
+                    <Ticket className="h-4 w-4" />
+                    {user?.name}
+                  </Link>
+                </Button>
                 {user?.role === "admin" && (
                   <Button
                     asChild
@@ -152,6 +159,18 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 {link.label}
               </Link>
             ))}
+            {isAuthenticated && (
+              <Link
+                to="/my-bookings"
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "block py-2 text-sm font-medium transition-colors hover:text-primary",
+                  location.pathname === "/my-bookings" ? "text-primary" : "text-muted-foreground"
+                )}
+              >
+                My Bookings
+              </Link>
+            )}
             {isAuthenticated ? (
               <button
                 onClick={() => { logout(); navigate("/login"); setMobileMenuOpen(false); }}

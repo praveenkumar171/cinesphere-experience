@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
-const { users, refreshTokens } = require("../data/store");
+const { refreshTokens } = require("../data/store");
+const User = require("../models/User");
 const {
   generateAccessToken,
   generateRefreshToken,
@@ -14,13 +15,21 @@ exports.signup = async (req, res) => {
   if (!name || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
   }
-  if (users.find((u) => u.email === email)) {
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const existingUser = await User.findOne({ email: normalizedEmail });
+  if (existingUser) {
     return res.status(409).json({ message: "Email already registered" });
   }
 
   const hashed = await bcrypt.hash(password, 10);
-  const user = { id: uuidv4(), name, email, password: hashed, role: "user" };
-  users.push(user);
+  const user = await User.create({
+    id: uuidv4(),
+    name: name.trim(),
+    email: normalizedEmail,
+    password: hashed,
+    role: "user",
+  });
 
   const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
   const accessToken = generateAccessToken(payload);
@@ -38,7 +47,8 @@ exports.login = async (req, res) => {
     return res.status(400).json({ message: "Email and password are required" });
   }
 
-  const user = users.find((u) => u.email === email);
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ email: normalizedEmail });
   if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
   const match = await bcrypt.compare(password, user.password);

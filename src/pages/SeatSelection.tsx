@@ -1,11 +1,12 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, useMemo } from "react";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Monitor } from "lucide-react";
 import { movies } from "@/data/movies";
 import { theatres, showtimes } from "@/data/theatres";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { apiUrl } from "@/lib/api";
 
 type SeatStatus = "available" | "occupied" | "selected";
 type SeatTier = "standard" | "premium" | "vip";
@@ -19,25 +20,46 @@ interface Seat {
 
 const SeatSelection = () => {
   const { movieId, theatreId, time } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const movie = movies.find((m) => m.id === movieId);
   const theatre = theatres.find((t) => t.id === theatreId);
   const showtime = showtimes.find((s) => s.theatreId === theatreId && s.movieId === movieId);
   const decodedTime = time ? decodeURIComponent(time) : "";
+  const bookingDate = searchParams.get("date") || "";
+
+  const [bookedSeats, setBookedSeats] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch booked seats from backend
+  useEffect(() => {
+    const fetchBookedSeats = async () => {
+      try {
+        const response = await fetch(
+          apiUrl(
+            `/api/bookings/seats/booked?movieId=${movieId}&theatreId=${theatreId}&showTime=${encodeURIComponent(decodedTime)}`
+          )
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setBookedSeats(data.bookedSeats || []);
+        }
+      } catch (error) {
+        console.error("Error fetching booked seats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (movieId && theatreId && decodedTime) {
+      fetchBookedSeats();
+    }
+  }, [movieId, theatreId, decodedTime]);
 
   const seatMap = useMemo(() => {
     if (!theatre) return [];
     const { rows, cols, vipRows, premiumRows } = theatre.seatLayout;
     const seats: Seat[][] = [];
-    // Generate random occupied seats
-    const occupiedSet = new Set<string>();
-    const totalSeats = rows * cols;
-    const occupiedCount = Math.floor(totalSeats * 0.3);
-    while (occupiedSet.size < occupiedCount) {
-      const r = Math.floor(Math.random() * rows);
-      const c = Math.floor(Math.random() * cols);
-      occupiedSet.add(`${r}-${c}`);
-    }
 
     for (let r = 0; r < rows; r++) {
       const row: Seat[] = [];
@@ -46,25 +68,40 @@ const SeatSelection = () => {
       else if (r < vipRows + premiumRows) tier = "premium";
 
       for (let c = 0; c < cols; c++) {
-        // Add aisle gaps
+        const seatLabel = `${String.fromCharCode(65 + r)}${c + 1}`;
+        // Check if this seat is in the booked seats list
+        const isBooked = bookedSeats.includes(seatLabel);
+        
         row.push({
           row: r,
           col: c,
-          status: occupiedSet.has(`${r}-${c}`) ? "occupied" : "available",
+          status: isBooked ? "occupied" : "available",
           tier,
         });
       }
       seats.push(row);
     }
     return seats;
-  }, [theatre]);
+  }, [theatre, bookedSeats]);
 
   const [seats, setSeats] = useState<Seat[][]>(seatMap);
+
+  useEffect(() => {
+    setSeats(seatMap);
+  }, [seatMap]);
 
   if (!movie || !theatre || !showtime) {
     return (
       <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4">
         <p className="text-muted-foreground">Invalid booking selection</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4">
+        <p className="text-muted-foreground">Loading available seats...</p>
       </div>
     );
   }
@@ -89,7 +126,7 @@ const SeatSelection = () => {
 
   const handleProceed = () => {
     const seatLabels = selectedSeats.map((s) => `${rowLabel(s.row)}${s.col + 1}`);
-    navigate(`/confirm/${movieId}/${theatreId}/${encodeURIComponent(decodedTime)}?seats=${seatLabels.join(",")}&total=${totalPrice}`);
+    navigate(`/confirm/${movieId}/${theatreId}/${encodeURIComponent(decodedTime)}?seats=${seatLabels.join(",")}&total=${totalPrice}&date=${bookingDate}`);
   };
 
   const tierColors: Record<SeatTier, string> = {

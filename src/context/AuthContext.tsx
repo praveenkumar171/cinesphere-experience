@@ -9,9 +9,11 @@ export interface User {
 
 interface AuthContextValue {
   user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (user: User) => void;
+  login: (user: User, tokens?: { accessToken?: string; refreshToken?: string }) => void;
   logout: () => void;
 }
 
@@ -19,6 +21,8 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "cinesphere_user";
+const ACCESS_TOKEN_KEY = "cinesphere_access_token";
+const REFRESH_TOKEN_KEY = "cinesphere_refresh_token";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
@@ -29,6 +33,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return null;
     }
   });
+  const [accessToken, setAccessToken] = useState<string | null>(() => localStorage.getItem(ACCESS_TOKEN_KEY));
+  const [refreshToken, setRefreshToken] = useState<string | null>(() => localStorage.getItem(REFRESH_TOKEN_KEY));
 
   useEffect(() => {
     if (user) {
@@ -38,11 +44,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
-  const login = (userData: User) => setUser(userData);
-  const logout = () => setUser(null);
+  const login = (userData: User, tokens?: { accessToken?: string; refreshToken?: string }) => {
+    setUser(userData);
+
+    if (tokens?.accessToken) {
+      setAccessToken(tokens.accessToken);
+      localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
+    }
+
+    if (tokens?.refreshToken) {
+      setRefreshToken(tokens.refreshToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setAccessToken(null);
+    setRefreshToken(null);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isAdmin: user?.role === "admin", login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        refreshToken,
+        isAuthenticated: !!user,
+        isAdmin: user?.role === "admin",
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

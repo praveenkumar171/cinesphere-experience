@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { loginRequest } from "@/lib/authApi";
 
 /* ───────── helpers ───────── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -63,10 +64,12 @@ const Login = () => {
     setLoading(true);
 
     try {
-      /* Simulate an async login request (replace with real API) */
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const authResponse = await loginRequest(email.trim(), password);
 
-      login({ email, name: email.split("@")[0] });
+      login(authResponse.user, {
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+      });
 
       toast({
         title: "Welcome back!",
@@ -74,10 +77,13 @@ const Login = () => {
       });
 
       navigate(from, { replace: true });
-    } catch {
+    } catch (error) {
       toast({
         title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Invalid email or password. Please try again.",
         variant: "destructive",
       });
     } finally {

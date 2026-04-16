@@ -14,20 +14,34 @@ const Index = () => {
   const [search, setSearch] = useState("");
   const { selectedCity } = useCity();
 
+  // Safety checks: ensure data is arrays
+  const safeTheatres = Array.isArray(theatres) ? theatres : [];
+  const safeShowtimes = Array.isArray(showtimes) ? showtimes : [];
+  const safeMovies = Array.isArray(movies) ? movies : [];
+
   // Get theatre IDs for the selected city
-  const cityTheatreIds = theatres.filter((t) => t.city === selectedCity).map((t) => t.id);
+  const cityTheatreIds = safeTheatres.filter((t) => t.city === selectedCity).map((t) => t.id);
   // Get movie IDs that have showtimes in the selected city's theatres
   const cityMovieIds = new Set(
-    showtimes.filter((s) => cityTheatreIds.includes(s.theatreId)).map((s) => s.movieId)
+    safeShowtimes.filter((s) => cityTheatreIds.includes(s.theatreId)).map((s) => s.movieId)
   );
 
-  const nowShowing = movies.filter((m) => m.status === "now-showing" && cityMovieIds.has(m.id));
-  const comingSoon = movies.filter((m) => m.status === "coming-soon");
-  const featured = nowShowing[0] || movies.find((m) => m.status === "now-showing");
+  const nowShowing = safeMovies.filter((m) => m.status === "now-showing" && cityMovieIds.has(m.id));
+  const comingSoon = safeMovies.filter((m) => m.status === "coming-soon");
+  const featured = nowShowing[0] || safeMovies.find((m) => m.status === "now-showing");
 
   const filteredMovies = search
-    ? movies.filter((m) => m.title.toLowerCase().includes(search.toLowerCase()))
+    ? safeMovies.filter((m) => m.title.toLowerCase().includes(search.toLowerCase()))
     : null;
+
+  // Safety check: if no featured movie, show loading state
+  if (!featured) {
+    return (
+      <div className="container mx-auto flex min-h-screen items-center justify-center px-4">
+        <p className="text-muted-foreground">Loading movies...</p>
+      </div>
+    );
+  }
 
   return (
     <div>

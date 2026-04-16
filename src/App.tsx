@@ -14,6 +14,7 @@ import TheatreExplorer from "./pages/TheatreExplorer";
 import TheatreDetail from "./pages/TheatreDetail";
 import SeatSelection from "./pages/SeatSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import MyBookings from "./pages/MyBookings";
 import Feedback from "./pages/Feedback";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
@@ -49,8 +50,9 @@ const App = () => (
             <Route path="/movie/:id" element={<Protected><MovieDetail /></Protected>} />
             <Route path="/theatres" element={<Protected><TheatreExplorer /></Protected>} />
             <Route path="/theatre/:id" element={<Protected><TheatreDetail /></Protected>} />
-            <Route path="/book/:movieId/:theatreId/:time" element={<Protected><SeatSelection /></Protected>} />
+            <Route path="/seat/:movieId/:theatreId/:time" element={<Protected><SeatSelection /></Protected>} />
             <Route path="/confirm/:movieId/:theatreId/:time" element={<Protected><BookingConfirmation /></Protected>} />
+            <Route path="/my-bookings" element={<Protected><MyBookings /></Protected>} />
             <Route path="/feedback/:theatreId" element={<Protected><Feedback /></Protected>} />
 
             {/* Admin — requires admin role */}

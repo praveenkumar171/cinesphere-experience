@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Monitor, Star } from "lucide-react";
 import { theatres } from "@/data/theatres";
 import StarRating from "@/components/StarRating";
+import TheatreMap from "@/components/TheatreMap";
 import { useCity } from "@/context/CityContext";
 
 const TheatreExplorer = () => {
@@ -13,6 +14,8 @@ const TheatreExplorer = () => {
     <div className="container mx-auto px-4 py-12">
       <h1 className="font-display text-3xl font-bold mb-2">Theatre Explorer</h1>
       <p className="text-muted-foreground mb-8">Showing theatres in <span className="text-primary font-semibold">{selectedCity}</span></p>
+
+      <TheatreMap theatres={filteredTheatres} selectedCity={selectedCity} />
 
       <AnimatePresence mode="wait">
         <motion.div

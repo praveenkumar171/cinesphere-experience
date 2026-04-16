@@ -6,6 +6,7 @@ import { theatres, showtimes } from "@/data/theatres";
 import { movies } from "@/data/movies";
 import { Button } from "@/components/ui/button";
 import StarRating from "@/components/StarRating";
+import TheatreDirectionsMap from "@/components/TheatreDirectionsMap";
 
 const TheatreDetail = () => {
   const { id } = useParams();
@@ -95,6 +96,8 @@ const TheatreDetail = () => {
         </div>
 
         {/* Now Showing */}
+        <TheatreDirectionsMap theatre={theatre} />
+
         {theatreShowtimes.length > 0 && (
           <section className="mt-10">
             <h2 className="font-display text-xl font-bold mb-4">Now Showing Here</h2>

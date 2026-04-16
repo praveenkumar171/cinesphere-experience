@@ -1,28 +1,46 @@
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Film, MapPin, Clock, Armchair, QrCode, ArrowLeft, Download } from "lucide-react";
+import { Check, Film, MapPin, Clock, Calendar, Armchair, ArrowLeft, Download } from "lucide-react";
 import { movies } from "@/data/movies";
 import { theatres } from "@/data/theatres";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { apiUrl } from "@/lib/api";
 
 const BookingConfirmation = () => {
   const { movieId, theatreId, time } = useParams();
   const [searchParams] = useSearchParams();
   const [confirmed, setConfirmed] = useState(false);
-  const { user } = useAuth();
+  const [isCreating, setIsCreating] = useState(false);
+  const { user, accessToken } = useAuth();
+  const { toast } = useToast();
 
-  const movie = movies.find((m) => m.id === movieId);
-  const theatre = theatres.find((t) => t.id === theatreId);
+  // Safety: ensure data arrays exist
+  const safeMovies = Array.isArray(movies) ? movies : [];
+  const safeTheatres = Array.isArray(theatres) ? theatres : [];
+
+  const movie = safeMovies.find((m) => m.id === movieId);
+  const theatre = safeTheatres.find((t) => t.id === theatreId);
   const decodedTime = time ? decodeURIComponent(time) : "";
   const seats = searchParams.get("seats") || "";
   const total = searchParams.get("total") || "0";
+  const bookingDate = searchParams.get("date") || "";
+  
+  // Format date for display
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "Today";
+    const date = new Date(dateStr);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+    const dayNum = date.getDate();
+    return `${dayNum} ${dayName.toUpperCase()}`;
+  };
 
-  if (!movie || !theatre) {
+  if (!movie || !theatre || !movieId || !theatreId || !seats || !decodedTime) {
     return (
       <div className="container mx-auto flex min-h-[60vh] items-center justify-center px-4">
-        <p className="text-muted-foreground">Invalid booking</p>
+        <p className="text-muted-foreground">Invalid booking - missing required information</p>
       </div>
     );
   }
@@ -50,18 +68,13 @@ const BookingConfirmation = () => {
               <p className="text-sm text-muted-foreground">{theatre.name}</p>
             </div>
             <div className="p-5 space-y-3 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span>Today</span></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span>{formatDate(bookingDate)}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Time</span><span>{decodedTime}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Seats</span><span>{seats}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-primary">₹{total}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Booking ID</span><span className="font-mono text-xs">{bookingId}</span></div>
             </div>
-            <div className="border-t border-dashed border-border p-5 flex flex-col items-center">
-              <div className="h-28 w-28 rounded-lg bg-foreground/10 flex items-center justify-center">
-                <QrCode className="h-20 w-20 text-foreground/30" />
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">Scan at entrance</p>
-            </div>
+
           </div>
 
           <div className="mt-6 flex gap-3 justify-center">
@@ -95,6 +108,7 @@ const BookingConfirmation = () => {
 
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /><span>{theatre.name} — {theatre.location}</span></div>
+            <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-primary" /><span>{formatDate(bookingDate)}</span></div>
             <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /><span>{decodedTime}</span></div>
             <div className="flex items-center gap-2"><Armchair className="h-4 w-4 text-primary" /><span>Seats: {seats}</span></div>
           </div>
@@ -104,17 +118,99 @@ const BookingConfirmation = () => {
             <span className="font-display text-3xl font-bold text-primary">₹{total}</span>
           </div>
 
-          <Button className="w-full" size="lg" onClick={() => {
-            // Save booking to localStorage so user can write reviews
-            if (user && movieId) {
-              const key = "cinesphere_bookings";
-              const stored = JSON.parse(localStorage.getItem(key) || "[]");
-              stored.push({ email: user.email, movieId, theatreId, time: decodedTime, seats, total, date: new Date().toISOString() });
-              localStorage.setItem(key, JSON.stringify(stored));
-            }
-            setConfirmed(true);
-          }}>
-            Confirm Booking
+          <Button 
+            className="w-full" 
+            size="lg" 
+            disabled={isCreating}
+            onClick={async () => {
+              // Comprehensive validation
+              if (!user) {
+                console.error("User not authenticated");
+                toast({ description: "Please login first", variant: "destructive" });
+                return;
+              }
+
+              if (!user.email || !user.name) {
+                console.error("User missing email or name", user);
+                toast({ description: "User profile incomplete", variant: "destructive" });
+                return;
+              }
+
+              if (!movieId || !theatreId || !decodedTime || !seats) {
+                console.error("Missing booking details", { movieId, theatreId, decodedTime, seats });
+                toast({ description: "Missing booking details", variant: "destructive" });
+                return;
+              }
+              
+              setIsCreating(true);
+              try {
+                const token = accessToken || localStorage.getItem("cinesphere_access_token");
+                
+                if (!token) {
+                  console.error("No authentication token available");
+                  toast({ description: "Authentication token missing - please login again", variant: "destructive" });
+                  setIsCreating(false);
+                  return;
+                }
+
+                const seatsList = seats.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                
+                if (seatsList.length === 0) {
+                  console.error("No valid seats provided", seats);
+                  toast({ description: "No valid seats selected", variant: "destructive" });
+                  setIsCreating(false);
+                  return;
+                }
+
+                console.log("Sending booking request:", { movieId, theatreId, time: decodedTime, seats: seatsList });
+
+                const response = await fetch(apiUrl("/api/bookings"), {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    movieId,
+                    theatreId,
+                    time: decodedTime,
+                    seats: seatsList
+                  })
+                });
+                
+                console.log("Booking response status:", response.status);
+
+                if (response.ok) {
+                  // Also save to localStorage for reviews
+                  const key = "cinesphere_bookings";
+                  const stored = JSON.parse(localStorage.getItem(key) || "[]");
+                  stored.push({ email: user.email, movieId, theatreId, time: decodedTime, seats, total, date: new Date().toISOString() });
+                  localStorage.setItem(key, JSON.stringify(stored));
+                  
+                  console.log("Booking confirmed successfully");
+                  toast({ description: "Booking confirmed successfully!" });
+                  setConfirmed(true);
+                } else {
+                  let errorMsg = `HTTP ${response.status}`;
+                  try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.message || errorMsg;
+                  } catch (e) {
+                    // Could not parse error response
+                  }
+                  console.error("Booking API Error:", errorMsg, response.status);
+                  toast({ description: `Booking failed: ${errorMsg}`, variant: "destructive" });
+                }
+              } catch (error) {
+                console.error("Booking error:", error);
+                const errorMsg = error instanceof Error ? error.message : "Unknown error";
+                toast({ description: `Failed to create booking: ${errorMsg}`, variant: "destructive" });
+              } finally {
+                setIsCreating(false);
+              }
+            }}
+          >
+            {isCreating ? "Processing..." : "Confirm Booking"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">This is a simulated booking — no real payment will be made</p>
         </div>

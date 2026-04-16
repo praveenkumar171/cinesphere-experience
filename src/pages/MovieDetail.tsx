@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, Clock, Globe, Users, ArrowLeft, MessageSquare, Send } from "lucide-react";
+import { Star, Clock, Globe, Users, ArrowLeft, MessageSquare, Send, Calendar } from "lucide-react";
 import { movies } from "@/data/movies";
 import { theatres } from "@/data/theatres";
 import { showtimes } from "@/data/theatres";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCity } from "@/context/CityContext";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 /* ─── Review helpers ─── */
 interface Review {
@@ -57,6 +58,21 @@ const MovieDetail = () => {
   const [reviewRating, setReviewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  // Generate next 7 days
+  const upcomingDates = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    return date;
+  });
+
+  // Set default date to today
+  useEffect(() => {
+    if (!selectedDate) {
+      setSelectedDate(upcomingDates[0].toISOString().split("T")[0]);
+    }
+  }, []);
 
   useEffect(() => {
     if (id) setReviews(loadReviews(id));
@@ -127,6 +143,39 @@ const MovieDetail = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Select Date Section */}
+        {movie.status === "now-showing" && movieShowtimes.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-display text-2xl font-bold mb-4 flex items-center gap-2">
+              <Calendar className="h-6 w-6 text-primary" />
+              Select Date
+            </h2>
+            <div className="grid grid-cols-4 md:grid-cols-7 gap-2 mb-8">
+              {upcomingDates.map((date) => {
+                const dateStr = date.toISOString().split("T")[0];
+                const dayName = date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const dayNum = date.getDate();
+
+                return (
+                  <button
+                    key={dateStr}
+                    onClick={() => setSelectedDate(dateStr)}
+                    className={cn(
+                      "p-3 rounded-lg border-2 transition-all text-center",
+                      selectedDate === dateStr
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <div className="font-bold text-sm">{dayNum}</div>
+                    <div className="text-xs text-muted-foreground">{dayName}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {/* Showtimes */}
         {/* ═══════ Reviews Section ═══════ */}
@@ -277,7 +326,7 @@ const MovieDetail = () => {
                       <div className="flex flex-wrap gap-2">
                         {st.times.map((time) => (
                           <Button key={time} asChild variant="outline" size="sm">
-                            <Link to={`/book/${movie.id}/${theatre.id}/${encodeURIComponent(time)}`}>
+                            <Link to={`/seat/${movie.id}/${theatre.id}/${encodeURIComponent(time)}?date=${selectedDate}`}>
                               {time}
                             </Link>
                           </Button>

@@ -1,8 +1,9 @@
-const { users, bookings } = require("../data/store");
+const { bookings } = require("../data/store");
+const User = require("../models/User");
 
 /* ─── GET PROFILE ─── */
-exports.getProfile = (req, res) => {
-  const user = users.find((u) => u.id === req.user.id);
+exports.getProfile = async (req, res) => {
+  const user = await User.findOne({ id: req.user.id }).lean();
   if (!user) return res.status(404).json({ message: "User not found" });
 
   const { password, ...safe } = user;

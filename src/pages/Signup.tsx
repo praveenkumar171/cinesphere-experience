@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { signupRequest } from "@/lib/authApi";
 
 /* ───────── helpers ───────── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -67,10 +68,12 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      /* Simulate an async signup request (replace with real API) */
-      await new Promise((resolve) => setTimeout(resolve, 1200));
+      const authResponse = await signupRequest(name.trim(), email.trim(), password);
 
-      login({ email, name: name.trim() });
+      login(authResponse.user, {
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+      });
 
       toast({
         title: "Account created!",
@@ -78,10 +81,13 @@ const Signup = () => {
       });
 
       navigate("/home");
-    } catch {
+    } catch (error) {
       toast({
         title: "Signup failed",
-        description: "Something went wrong. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
