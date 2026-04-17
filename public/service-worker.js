@@ -1,38 +1,51 @@
-// EMERGENCY CLEANUP SERVICE WORKER
-// This SW clears all caches and unregisters itself to force fresh code load
-console.log('🔄 Emergency cleanup: Clearing all caches and unregistering...');
+// Clean Service Worker - Network first for app code, minimal caching
+const CACHE_NAME = 'cinesphere-v1';
 
-// Delete ALL caches immediately
-caches.keys().then((cacheNames) => {
-  console.log('🗑️ Deleting all caches:', cacheNames);
-  return Promise.all(
-    cacheNames.map((cacheName) => caches.delete(cacheName))
-  );
-}).then(() => {
-  console.log('✅ All caches cleared');
-});
+console.log('✅ Service Worker Loaded');
 
-// Install event - just skip waiting and let client control
 self.addEventListener('install', (event) => {
-  console.log('⚡ Install event - skipping wait');
   self.skipWaiting();
 });
 
-// Activate event - claim all clients and unregister
 self.addEventListener('activate', (event) => {
-  console.log('⚡ Activate event - claiming clients and unregistering');
   event.waitUntil(
-    self.clients.claim().then(() => {
-      return self.registration.unregister().then(() => {
-        console.log('✅ Service Worker unregistered successfully');
+    caches.keys().then((names) => Promise.all(names.map(n => caches.delete(n)))).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  if (request.method !== 'GET') return;
+
+  // Network first for HTML/JS
+  if (url.pathname === '/' || url.pathname.endsWith('.html') || (url.pathname.includes('/assets/') && url.pathname.endsWith('.js'))) {
+    event.respondWith(fetch(request).catch(() => new Response('Offline', { status: 503 })));
+    return;
+  }
+
+  // API - network first
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(request).catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Static assets - cache first
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return fetch(request).then((r) => {
+        if (r && r.status === 200) {
+          const rc = r.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(request, rc));
+        }
+        return r;
       });
     })
   );
 });
 
-// Fetch event - just pass through everything to network
-self.addEventListener('fetch', (event) => {
-  // Do nothing - let all requests go to network
-  console.log('📤 Passthrough fetch:', event.request.url);
-});
 

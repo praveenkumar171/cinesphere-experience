@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "./index.css";
 import { registerServiceWorker } from "./lib/pwaUtils";
 
-// TEMPORARILY DISABLED: Service worker was caching old code
-// registerServiceWorker();
+// Re-enabling with clean cache strategy
+registerServiceWorker();
 
 createRoot(document.getElementById("root")!).render(<App />);
