@@ -73,3 +73,29 @@ export const loginRequest = async (email: string, password: string): Promise<Aut
     throw error;
   }
 };
+
+export const refreshTokenRequest = async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+  try {
+    const url = apiUrl("/api/auth/refresh");
+    console.log("🔄 Refresh token request to:", url);
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: refreshToken }),
+      credentials: "omit",
+      cache: "no-store",
+    });
+
+    console.log("📥 Refresh token response:", response.status, response.statusText);
+    
+    if (!response.ok) {
+      throw new Error(await parseError(response));
+    }
+
+    return (await response.json()) as { accessToken: string; refreshToken: string };
+  } catch (error) {
+    console.error("❌ Refresh token error:", error);
+    throw error;
+  }
+};

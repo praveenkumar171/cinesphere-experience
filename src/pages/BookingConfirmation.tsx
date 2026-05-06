@@ -8,13 +8,14 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { apiUrl } from "@/lib/api";
+import { refreshTokenRequest } from "@/lib/authApi";
 
 const BookingConfirmation = () => {
   const { movieId, theatreId, time } = useParams();
   const [searchParams] = useSearchParams();
   const [confirmed, setConfirmed] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, refreshToken, login } = useAuth();
   const { toast } = useToast();
 
   // Safety: ensure data arrays exist
@@ -144,7 +145,7 @@ const BookingConfirmation = () => {
               
               setIsCreating(true);
               try {
-                const token = accessToken || localStorage.getItem("cinesphere_access_token");
+                let token = accessToken || localStorage.getItem("cinesphere_access_token");
                 
                 if (!token) {
                   console.error("No authentication token available");
@@ -164,7 +165,7 @@ const BookingConfirmation = () => {
 
                 console.log("Sending booking request:", { movieId, theatreId, time: decodedTime, seats: seatsList });
 
-                const response = await fetch(apiUrl("/api/bookings"), {
+                let response = await fetch(apiUrl("/api/bookings"), {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
@@ -179,6 +180,55 @@ const BookingConfirmation = () => {
                 });
                 
                 console.log("Booking response status:", response.status);
+
+                // Handle token expiration - try to refresh and retry
+                if (response.status === 401) {
+                  console.log("🔄 Token expired, attempting refresh...");
+                  const storedRefreshToken = refreshToken || localStorage.getItem("cinesphere_refresh_token");
+                  
+                  if (!storedRefreshToken) {
+                    console.error("No refresh token available");
+                    toast({ description: "Session expired - please login again", variant: "destructive" });
+                    setIsCreating(false);
+                    return;
+                  }
+
+                  try {
+                    // Attempt to refresh the token
+                    const refreshResponse = await refreshTokenRequest(storedRefreshToken);
+                    const newAccessToken = refreshResponse.accessToken;
+                    const newRefreshToken = refreshResponse.refreshToken;
+                    
+                    // Update tokens in context and localStorage
+                    localStorage.setItem("cinesphere_access_token", newAccessToken);
+                    localStorage.setItem("cinesphere_refresh_token", newRefreshToken);
+                    login(user, { accessToken: newAccessToken, refreshToken: newRefreshToken });
+                    
+                    console.log("✅ Token refreshed successfully, retrying booking...");
+                    
+                    // Retry the booking request with new token
+                    response = await fetch(apiUrl("/api/bookings"), {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${newAccessToken}`
+                      },
+                      body: JSON.stringify({
+                        movieId,
+                        theatreId,
+                        time: decodedTime,
+                        seats: seatsList
+                      })
+                    });
+                    
+                    console.log("Booking retry response status:", response.status);
+                  } catch (refreshError) {
+                    console.error("Token refresh failed:", refreshError);
+                    toast({ description: "Session expired - please login again", variant: "destructive" });
+                    setIsCreating(false);
+                    return;
+                  }
+                }
 
                 if (response.ok) {
                   // Also save to localStorage for reviews
